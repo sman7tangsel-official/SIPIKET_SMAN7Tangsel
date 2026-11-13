@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIPIKET SMAN 7 TANGSEL</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @media print {
+      body * { visibility: hidden; }
+      #printableArea, #printableArea * { visibility: visible; }
+      #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <div id="app">
+    <!-- LOGIN SECTION -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-emerald-700 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+        <div class="text-center mb-6">
+          <div class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-3 p-1">
+            <img id="loginLogoImg" src="logo sman7tangsel.jpeg" class="w-20 h-20 object-contain" alt="Logo SMAN 7 Tangsel">
+          </div>
+          <h1 class="text-2xl font-bold text-gray-800">SIPIKET</h1>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-widest mt-1">SMAN 7 KOTA TANGERANG SELATAN</p>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Username / Email</label>
+            <input type="text" id="loginUser" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input type="password" id="loginPass" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <button type="submit" id="btnLogin" class="w-full bg-blue-900 hover:bg-blue-950 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-md">
+            Masuk Aplikasi
+          </button>
+        </form>
+        <p id="loginError" class="text-red-500 text-sm mt-3 text-center hidden"></p>
+      </div>
+    </div>
+
+    <!-- MAIN APP LAYOUT -->
+    <div id="mainLayout" class="hidden min-h-screen flex">
+      <!-- SIDEBAR -->
+      <aside class="w-64 bg-blue-900 text-white flex flex-col justify-between hidden md:flex">
+        <div>
+          <div class="p-6 border-b border-blue-700 flex items-center space-x-3">
+            <i class="fa-solid fa-broom text-2xl text-emerald-400"></i>
+            <div>
+              <h2 class="font-bold text-lg leading-tight">SIPIKET</h2>
+              <p class="text-xs text-blue-200">SMAN 7 TANGSEL</p>
+            </div>
+          </div>
+          <nav class="p-4 space-y-2">
+            <button id="menuDashboard" onclick="switchTab('dashboardTab')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-800 transition">
+              <i class="fa-solid fa-chart-line"></i><span>Dashboard</span>
+            </button>
+            <button id="menuFormPiket" onclick="switchTab('formPiketTab')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-800 transition">
+              <i class="fa-solid fa-pen-to-square"></i><span>Input Laporan</span>
+            </button>
+            <button id="menuMonitoring" onclick="switchTab('monitoringTab')" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-blue-800 transition">
+              <i class="fa-solid fa-table-cells"></i><span>Monitoring Kelas</span>
+            </button>
+          </nav>
+        </div>
+        <div class="p-4 border-t border-blue-700">
+          <div class="flex items-center space-x-3 mb-3">
+            <i class="fa-solid fa-circle-user text-2xl text-emerald-400"></i>
+            <div>
+              <p id="navUserName" class="text-sm font-semibold">User Name</p>
+              <p id="navUserRole" class="text-xs text-blue-300 capitalize">Role</p>
+            </div>
+          </div>
+          <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white text-sm py-2 rounded-lg transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-right-from-bracket"></i><span>Keluar</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- CONTENT CONTAINER -->
+      <main class="flex-1 flex flex-col overflow-y-auto">
+        <header class="bg-white border-b px-6 py-4 flex items-center justify-between shadow-sm">
+          <h1 id="pageTitle" class="text-xl font-bold text-gray-800">Dashboard Utama</h1>
+          <span id="roleBadge" class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-3 py-1 rounded-full">User Role</span>
+        </header>
+
+        <div class="p-6 space-y-6">
+          <!-- TAB 1: DASHBOARD -->
+          <div id="dashboardTab" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-600">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Total Rombel</p>
+                <p id="statTotalKelas" class="text-3xl font-bold text-gray-800 mt-1">33</p>
+              </div>
+              <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-emerald-500">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Sudah Piket Hari Ini</p>
+                <p id="statSudahPiket" class="text-3xl font-bold text-emerald-600 mt-1">0</p>
+              </div>
+              <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-amber-500">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Belum Piket</p>
+                <p id="statBelumPiket" class="text-3xl font-bold text-amber-600 mt-1">33</p>
+              </div>
+              <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-indigo-500">
+                <p class="text-xs font-semibold text-gray-500 uppercase">Capaian Kebersihan</p>
+                <p id="statPersentase" class="text-3xl font-bold text-indigo-600 mt-1">0%</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: INPUT LAPORAN PIKET PULANG SEKOLAH -->
+          <div id="formPiketTab" class="hidden bg-white p-6 rounded-xl shadow-sm space-y-6">
+            <div class="border-b pb-3 flex flex-wrap justify-between items-center gap-2">
+              <div>
+                <h2 class="text-lg font-bold text-gray-800">Formulir Laporan Kebersihan Piket Siswa</h2>
+                <p id="infoJadwalPiket" class="text-xs text-gray-600 mt-0.5">
+                  Jadwal Piket: <strong>Senin, Selasa, Kamis (15.00 - 16.00 WIB)</strong> | <strong>Rabu &amp; Jumat (13.00 - 14.00 WIB)</strong>
+                </p>
+              </div>
+              <span id="badgeJadwalHariIni" class="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-semibold">Jam Pulang Sekolah</span>
+            </div>
+            <form id="piketForm" onsubmit="submitFormPiket(event)" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">Pilih Kelas</label>
+                  <select id="formKelas" required class="w-full px-3 py-2 border rounded-lg">
+                    <option value="">-- Pilih Kelas --</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">Petugas Piket Hari Ini</label>
+                  <input type="text" id="formPetugas" required class="w-full px-3 py-2 border rounded-lg" placeholder="Isikan nama-nama siswa piket">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Foto Sebelum Piket</label>
+                  <input type="file" accept="image/*" id="fotoSebelumInput" onchange="previewImage(this, 'previewSebelum')" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700">
+                  <img id="previewSebelum" class="mt-3 rounded-lg border h-48 w-full object-cover hidden">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Foto Sesudah Piket</label>
+                  <input type="file" accept="image/*" id="fotoSesudahInput" onchange="previewImage(this, 'previewSesudah')" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-emerald-50 file:text-emerald-700">
+                  <img id="previewSesudah" class="mt-3 rounded-lg border h-48 w-full object-cover hidden">
+                </div>
+              </div>
+
+              <button type="submit" id="btnSubmitForm" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow transition">
+                Kirim Laporan Piket Pulang Sekolah
+              </button>
+            </form>
+          </div>
+
+          <!-- TAB 3: MONITORING TABEL -->
+          <div id="monitoringTab" class="hidden bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b flex justify-between items-center">
+              <h2 id="monitoringTitle" class="font-bold text-gray-800">Status Monitoring Real-Time</h2>
+              <button onclick="loadKelasList()" class="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg border hover:bg-blue-100">
+                <i class="fa-solid fa-rotate"></i> Refresh Data
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm text-gray-600">
+                <thead class="bg-gray-50 border-b uppercase text-xs text-gray-500">
+                  <tr>
+                    <th class="px-4 py-3">No</th>
+                    <th class="px-4 py-3">Kelas</th>
+                    <th class="px-4 py-3">Wali Kelas</th>
+                    <th class="px-4 py-3">Status Piket</th>
+                    <th class="px-4 py-3">Penilaian Kebersihan (Admin/Walas)</th>
+                    <th class="px-4 py-3">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="monitoringTbody" class="divide-y"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL DETAIL LAPORAN KOP DENGAN LOGO ASLI SMAN 7 TANGSEL -->
+  <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-4 max-h-[95vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3 no-print">
+        <h3 id="modalTitle" class="text-lg font-bold text-gray-800">Detail Laporan Piket</h3>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <!-- AREA CETAK KOP SEKOLAH RESMI -->
+      <div id="printableArea" class="p-2 space-y-4">
+        <div class="flex items-center justify-between border-b-4 border-double border-gray-900 pb-3 mb-4">
+          <!-- LOGO ASLI SMAN 7 TANGSEL -->
+          <div class="w-20 h-20 flex items-center justify-center">
+            <img id="kopLogoImg" src="logo sman7tangsel.jpeg" class="w-20 h-20 object-contain" alt="Logo SMAN 7 Tangsel">
+          </div>
+          <div class="text-center flex-1 px-2">
+            <h4 class="font-bold text-sm tracking-wide uppercase">PEMERINTAH PROVINSI BANTEN</h4>
+            <h4 class="font-bold text-sm tracking-wide uppercase text-gray-800">DINAS PENDIDIKAN DAN KEBUDAYAAN</h4>
+            <h3 class="font-extrabold text-lg text-blue-900 uppercase">SMA NEGERI 7 KOTA TANGERANG SELATAN</h3>
+            <p class="text-xs text-gray-600">Jl. Perumahan Villa Melati Mas Blok J No. 101, Pondok Jagung-Serpong Utara, Tangerang Selatan</p>
+            <p class="text-[10px] text-gray-500">Email: info@sman7tangsel.sch.id | Website: sman7tangsel.sch.id</p>
+          </div>
+          <div class="w-20 h-20"></div>
+        </div>
+
+        <h4 class="text-center font-bold text-base underline uppercase">BUKTI LAPORAN PIKET KEBERSIHAN RUANG KELAS</h4>
+
+        <div id="modalBody" class="space-y-4"></div>
+
+        <div class="grid grid-cols-2 gap-8 pt-8 mt-6 text-xs text-center">
+          <div>
+            <p>Mengetahui,</p>
+            <p class="font-bold mt-1">Wali Kelas</p>
+            <div class="h-16"></div>
+            <p id="ttdWaliKelas" class="font-bold underline">( ............................................ )</p>
+          </div>
+          <div>
+            <p>Tangerang Selatan, <span id="ttdTanggal">-</span></p>
+            <p class="font-bold mt-1">Petugas Piket Kelas</p>
+            <div class="h-16"></div>
+            <p id="ttdPetugas" class="font-bold underline">( ............................................ )</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AKSI TOMBOL MODAL -->
+      <div class="flex justify-between items-center pt-4 border-t no-print">
+        <div>
+          <button id="btnHapusLaporan" onclick="hapusLaporanCurrent()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hidden">
+            <i class="fa-solid fa-trash"></i> Hapus Laporan
+          </button>
+        </div>
+        <div class="space-x-2">
+          <button onclick="window.print()" class="bg-blue-900 hover:bg-blue-950 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+            <i class="fa-solid fa-print"></i> Cetak Laporan PDF
+          </button>
+          <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwrIrvvYyRRYhVfja_Z4l5m0z1l5ynzxnC5CKDn9so0ILzFUvgOzG0VsSwczIMY9zk1lg/exec";
+
+    // Menentukan jadwal pulang sekolah berdasarkan hari
+    function getJadwalHariIni(namaHari) {
+      const h = String(namaHari).trim().toLowerCase();
+      if (h === "rabu" || h === "jumat" || h === "jum'at") {
+        return { mulai: "13.00", selesai: "14.00" };
+      }
+      return { mulai: "15.00", selesai: "16.00" };
+    }
+
+    // Konversi otomatis logo sekolah lokal menjadi Base64 Data URI agar selalu tampil di kop cetak PDF
+    function konversiLogoKeBase64() {
+      const loginLogo = document.getElementById('loginLogoImg');
+      const kopLogo = document.getElementById('kopLogoImg');
+      if (!loginLogo) return;
+
+      loginLogo.onload = function() {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = loginLogo.naturalWidth;
+          canvas.height = loginLogo.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(loginLogo, 0, 0);
+          const base64Logo = canvas.toDataURL('image/png');
+          loginLogo.src = base64Logo;
+          if (kopLogo) kopLogo.src = base64Logo;
+        } catch (e) {}
+      };
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      konversiLogoKeBase64();
+      const hariIni = new Date().toLocaleDateString('id-ID', { weekday: 'long' });
+      const jadwal = getJadwalHariIni(hariIni);
+      const badge = document.getElementById('badgeJadwalHariIni');
+      if (badge) {
+        badge.innerText = `Hari Ini (${hariIni}): ${jadwal.mulai} - ${jadwal.selesai} WIB`;
+      }
+    });
+
+    function getDirectImageUrl(url) {
+      if (!url) return '';
+      if (url.startsWith('data:image')) return url;
+      let fileId = '';
+      if (url.includes("id=")) {
+        fileId = url.split("id=")[1].split("&")[0];
+      } else if (url.includes("/d/")) {
+        fileId = url.split("/d/")[1].split("/")[0];
+      }
+      if (fileId) {
+        return "https://lh3.googleusercontent.com/d/" + fileId;
+      }
+      return url;
+    }
+
+    let currentUser = null;
+    let currentLaporanId = null;
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const btnLogin = document.getElementById('btnLogin');
+      btnLogin.innerText = "Memverifikasi...";
+      btnLogin.disabled = true;
+
+      const u = document.getElementById('loginUser').value;
+      const p = document.getElementById('loginPass').value;
+
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "login", username: u, password: p })
+      })
+      .then(res => res.json())
+      .then(data => {
+        btnLogin.innerText = "Masuk Aplikasi";
+        btnLogin.disabled = false;
+        if(data.status === "success") {
+          currentUser = data.user;
+          document.getElementById('loginSection').classList.add('hidden');
+          document.getElementById('mainLayout').classList.remove('hidden');
+          document.getElementById('navUserName').innerText = currentUser.nama_lengkap;
+          document.getElementById('navUserRole').innerText = currentUser.role;
+          document.getElementById('roleBadge').innerText = `ROLE: ${currentUser.role.toUpperCase()}`;
+          
+          applyRolePermissions();
+          initApp();
+        } else {
+          const err = document.getElementById('loginError');
+          err.innerText = data.message;
+          err.classList.remove('hidden');
+        }
+      })
+      .catch(err => {
+        btnLogin.innerText = "Masuk Aplikasi";
+        btnLogin.disabled = false;
+        alert("Gagal terhubung ke server: " + err);
+      });
+    }
+
+    function applyRolePermissions() {
+      const menuDash = document.getElementById('menuDashboard');
+      const menuForm = document.getElementById('menuFormPiket');
+      const menuMon = document.getElementById('menuMonitoring');
+
+      if (currentUser.role === 'siswa') {
+        menuDash.classList.add('hidden');
+        menuMon.classList.add('hidden');
+        menuForm.classList.remove('hidden');
+        switchTab('formPiketTab');
+      } else if (currentUser.role === 'walikelas') {
+        menuForm.classList.add('hidden');
+        menuDash.classList.remove('hidden');
+        menuMon.classList.remove('hidden');
+        switchTab('dashboardTab');
+      } else {
+        menuDash.classList.remove('hidden');
+        menuForm.classList.remove('hidden');
+        menuMon.classList.remove('hidden');
+        switchTab('dashboardTab');
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById('mainLayout').classList.add('hidden');
+      document.getElementById('loginSection').classList.remove('hidden');
+    }
+
+    function switchTab(tabId) {
+      ['dashboardTab', 'formPiketTab', 'monitoringTab'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+    }
+
+    function initApp() {
+      loadDashboard();
+      loadKelasList();
+    }
+
+    function loadDashboard() {
+      fetch(`${API_URL}?action=getDashboard`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('statSudahPiket').innerText = data.sudah_piket;
+          document.getElementById('statBelumPiket').innerText = data.belum_piket;
+          document.getElementById('statPersentase').innerText = data.persentase;
+        });
+    }
+
+    function loadKelasList() {
+      fetch(`${API_URL}?action=getKelas`)
+        .then(res => res.json())
+        .then(data => {
+          const select = document.getElementById('formKelas');
+          const tbody = document.getElementById('monitoringTbody');
+          select.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+          tbody.innerHTML = '';
+
+          let displayList = data;
+          if (currentUser && currentUser.role === 'walikelas') {
+            displayList = data.filter(k => k.nama_kelas === currentUser.kelas_akses);
+          }
+
+          displayList.forEach((k, idx) => {
+            select.innerHTML += `<option value="${k.nama_kelas}">${k.nama_kelas}</option>`;
+            
+            let penilaianHtml = `<span class="italic text-gray-400">${k.penilaian}</span>`;
+            if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'walikelas') && k.sudah_piket) {
+              penilaianHtml = `
+                <select onchange="updatePenilaian('${k.id_laporan}', this.value)" class="text-xs border border-emerald-600 rounded px-2 py-1 bg-white font-semibold text-emerald-800 shadow-sm focus:outline-none">
+                  <option value="Belum Dinilai" ${k.penilaian === 'Belum Dinilai' ? 'selected' : ''}>-- Beri Nilai --</option>
+                  <option value="Sangat Bersih" ${k.penilaian === 'Sangat Bersih' ? 'selected' : ''}>Sangat Bersih</option>
+                  <option value="Bersih" ${k.penilaian === 'Bersih' ? 'selected' : ''}>Bersih</option>
+                  <option value="Cukup Bersih" ${k.penilaian === 'Cukup Bersih' ? 'selected' : ''}>Cukup Bersih</option>
+                  <option value="Kurang Bersih" ${k.penilaian === 'Kurang Bersih' ? 'selected' : ''}>Kurang Bersih</option>
+                </select>
+              `;
+            }
+
+            tbody.innerHTML += `
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3">${idx+1}</td>
+                <td class="px-4 py-3 font-semibold text-gray-800">${k.nama_kelas}</td>
+                <td class="px-4 py-3">${k.wali_kelas}</td>
+                <td class="px-4 py-3">
+                  <span class="px-2 py-1 rounded-full text-xs font-semibold ${k.sudah_piket ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                    ${k.sudah_piket ? 'Sudah Piket' : 'Belum Piket'}
+                  </span>
+                </td>
+                <td class="px-4 py-3">${penilaianHtml}</td>
+                <td class="px-4 py-3">
+                  <button onclick="showDetail('${k.nama_kelas}', '${k.wali_kelas}')" class="text-xs bg-blue-900 hover:bg-blue-950 text-white px-3 py-1.5 rounded transition shadow-sm">
+                    <i class="fa-solid fa-eye"></i> Detail & Cetak
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+
+          if (currentUser.role === 'admin') {
+            select.disabled = false;
+          } else {
+            select.value = currentUser.kelas_akses;
+            select.disabled = true;
+          }
+        });
+    }
+
+    function updatePenilaian(idLaporan, penilaianVal) {
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "updatePenilaian", id_laporan: idLaporan, penilaian: penilaianVal })
+      })
+      .then(res => res.json())
+      .then(res => {
+        alert("Penilaian kebersihan berhasil diperbarui!");
+        loadKelasList();
+      });
+    }
+
+    function showDetail(namaKelas, waliKelas) {
+      const modal = document.getElementById('detailModal');
+      const body = document.getElementById('modalBody');
+      const btnHapus = document.getElementById('btnHapusLaporan');
+
+      document.getElementById('ttdWaliKelas').innerText = `( ${waliKelas} )`;
+      document.getElementById('ttdTanggal').innerText = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      body.innerHTML = `<p class="text-center text-gray-500 py-6"><i class="fa-solid fa-spinner fa-spin"></i> Memuat data laporan...</p>`;
+      modal.classList.remove('hidden');
+
+      fetch(`${API_URL}?action=getLaporanDetail&kelas=${namaKelas}`)
+        .then(res => res.json())
+        .then(res => {
+          if (res.status === 'success' && res.data) {
+            const d = res.data;
+            currentLaporanId = d.id_laporan;
+            document.getElementById('ttdPetugas').innerText = `( ${d.petugas_piket} )`;
+
+            if (currentUser && currentUser.role === 'admin') {
+              btnHapus.classList.remove('hidden');
+            } else {
+              btnHapus.classList.add('hidden');
+            }
+
+            const imgSebelum = getDirectImageUrl(d.url_foto_sebelum);
+            const imgSesudah = getDirectImageUrl(d.url_foto_sesudah);
+
+            // Jadwal dan Timestamp otomatis sesuai hari
+            const jadwal = getJadwalHariIni(d.hari);
+            const jamMulai = d.jam_mulai || jadwal.mulai;
+            const jamSelesai = d.jam_selesai || jadwal.selesai;
+
+            const timeSebelumStr = `${d.hari}, ${d.tanggal} | ${jamMulai} WIB`;
+            const timeSesudahStr = `${d.hari}, ${d.tanggal} | ${jamSelesai} WIB`;
+            const lokasiStr = `SMAN 7 KOTA TANGERANG SELATAN`;
+
+            body.innerHTML = `
+              <div class="grid grid-cols-2 gap-4 text-xs text-gray-700 bg-gray-50 p-4 rounded-lg border">
+                <div><span class="font-bold">Nama Kelas:</span> ${namaKelas}</div>
+                <div><span class="font-bold">Penilaian Kebersihan:</span> <span class="font-bold text-emerald-700 uppercase">${d.penilaian_kebersihan}</span></div>
+                <div><span class="font-bold">Petugas Piket:</span> ${d.petugas_piket}</div>
+                <div><span class="font-bold">Tanggal Piket:</span> ${d.tanggal} (${d.hari})</div>
+                <div class="col-span-2"><span class="font-bold">Waktu Pelaksanaan:</span> ${jamMulai} - ${jamSelesai} WIB (Pulang Sekolah)</div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 pt-2">
+                <div class="text-center">
+                  <p class="text-xs font-bold text-gray-700 mb-2">FOTO SEBELUM PIKET</p>
+                  <div class="relative rounded-lg overflow-hidden border shadow-sm">
+                    <img src="${imgSebelum}" class="w-full h-44 object-cover" alt="Sebelum Piket" onerror="this.src='https://via.placeholder.com/400x300?text=Foto+Sebelum+Piket'">
+                    <div class="absolute bottom-0 inset-x-0 bg-black/75 text-yellow-300 text-[10px] text-right px-2 py-1 leading-tight font-mono">
+                      <div>📷 ${timeSebelumStr}</div>
+                      <div class="text-gray-200 text-[9px]">📍 ${lokasiStr}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="text-center">
+                  <p class="text-xs font-bold text-emerald-700 mb-2">FOTO SESUDAH PIKET</p>
+                  <div class="relative rounded-lg overflow-hidden border shadow-sm">
+                    <img src="${imgSesudah}" class="w-full h-44 object-cover" alt="Sesudah Piket" onerror="this.src='https://via.placeholder.com/400x300?text=Foto+Sesudah+Piket'">
+                    <div class="absolute bottom-0 inset-x-0 bg-black/75 text-yellow-300 text-[10px] text-right px-2 py-1 leading-tight font-mono">
+                      <div>📷 ${timeSesudahStr}</div>
+                      <div class="text-gray-200 text-[9px]">📍 ${lokasiStr}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            currentLaporanId = null;
+            btnHapus.classList.add('hidden');
+            body.innerHTML = `
+              <div class="text-center py-8">
+                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-3xl mb-2"></i>
+                <p class="text-sm font-semibold text-gray-700">Belum Ada Laporan Piket Hari Ini</p>
+              </div>
+            `;
+          }
+        });
+    }
+
+    function hapusLaporanCurrent() {
+      if (!currentLaporanId) return alert("Tidak ada laporan yang dapat dihapus!");
+      if (!confirm("Apakah Anda yakin ingin menghapus laporan piket ini?")) return;
+
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "hapusLaporan", id_laporan: currentLaporanId })
+      })
+      .then(res => res.json())
+      .then(res => {
+        alert("Laporan piket berhasil dihapus!");
+        closeModal();
+        initApp();
+      });
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    function previewImage(input, previewId) {
+      const file = input.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const tempImg = new Image();
+          tempImg.onload = function() {
+            const canvas = document.createElement('canvas');
+            const maxWidth = 800;
+            const scaleSize = maxWidth / tempImg.width;
+            canvas.width = maxWidth;
+            canvas.height = tempImg.height * scaleSize;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
+
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+            const img = document.getElementById(previewId);
+            img.src = compressedDataUrl;
+            img.classList.remove('hidden');
+          };
+          tempImg.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function submitFormPiket(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitForm');
+      btn.innerText = "Mengunggah & Menyimpan...";
+      btn.disabled = true;
+
+      const selectKelas = document.getElementById('formKelas');
+      
+      const now = new Date();
+      const namaHari = now.toLocaleDateString('id-ID', { weekday: 'long' });
+      const jadwal = getJadwalHariIni(namaHari);
+      const localDate = now.getFullYear() + "-" + 
+                        String(now.getMonth() + 1).padStart(2, '0') + "-" + 
+                        String(now.getDate()).padStart(2, '0');
+
+      const payload = {
+        action: "submitLaporan",
+        nama_kelas: selectKelas.value || currentUser.kelas_akses,
+        petugas_piket: document.getElementById('formPetugas').value,
+        tanggal: localDate,
+        hari: namaHari,
+        jam_mulai: jadwal.mulai,
+        jam_selesai: jadwal.selesai,
+        catatan: `Piket selesai dilaksanakan pada jam pulang sekolah (${jadwal.mulai} - ${jadwal.selesai} WIB).`,
+        foto_sebelum: document.getElementById('previewSebelum').src,
+        foto_sesudah: document.getElementById('previewSesudah').src
+      };
+
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "success") {
+          alert("Laporan Piket Pulang Sekolah Berhasil Dikirim & Masuk Rekap!");
+          document.getElementById('piketForm').reset();
+          document.getElementById('previewSebelum').classList.add('hidden');
+          document.getElementById('previewSesudah').classList.add('hidden');
+          initApp();
+        } else {
+          alert("Gagal menyimpan: " + res.message);
+        }
+        btn.innerText = "Kirim Laporan Piket Pulang Sekolah";
+        btn.disabled = false;
+      })
+      .catch(err => {
+        alert("Terjadi gangguan koneksi saat mengirim data: " + err);
+        btn.innerText = "Kirim Laporan Piket Pulang Sekolah";
+        btn.disabled = false;
+      });
+    }
+  </script>
+</body>
+</html>
