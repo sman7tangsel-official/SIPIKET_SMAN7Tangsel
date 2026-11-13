@@ -13,25 +13,17 @@
         margin: 12mm;
       }
 
-      /* Sembunyikan total seluruh elemen halaman utama agar tidak memakan tinggi kertas */
-      body * {
+      /* Sembunyikan total container aplikasi utama (tabel monitoring di belakang) agar tidak memakan tinggi halaman 2, 3, 4 */
+      #app {
         display: none !important;
       }
 
-      /* Tampilkan kembali hanya struktur induk menuju area cetak */
-      html, body, #detailModal, #detailModal > div, #printableArea, #printableArea * {
-        display: revert !important;
-        visibility: visible !important;
-      }
-
-      /* Reset posisi modal agar menempel rapi di pojok kiri atas kertas */
+      /* Reset posisi modal tanpa mengubah tata letak grid di dalam #printableArea */
       #detailModal {
         position: static !important;
         background: none !important;
         padding: 0 !important;
         margin: 0 !important;
-        width: 100% !important;
-        height: auto !important;
         overflow: visible !important;
       }
 
@@ -44,14 +36,7 @@
         overflow: visible !important;
       }
 
-      #printableArea {
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        page-break-inside: avoid;
-      }
-
-      /* Pastikan warna background kotak info & stempel foto ikut tercetak */
+      /* Pastikan warna background kotak info & stempel waktu foto ikut tercetak */
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
