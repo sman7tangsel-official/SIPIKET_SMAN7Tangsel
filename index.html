@@ -13,22 +13,37 @@
         margin: 12mm;
       }
 
-      /* Sembunyikan total container aplikasi utama (tabel monitoring di belakang) agar tidak memakan tinggi halaman 2, 3, 4 */
+      /* Paksa seluruh latar belakang halaman dan body menjadi putih bersih */
+      html, body {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+      }
+
+      /* Sembunyikan total container aplikasi utama di belakang modal */
       #app {
         display: none !important;
       }
 
-      /* Reset posisi modal tanpa mengubah tata letak grid di dalam #printableArea */
+      /* Reset posisi dan latar belakang modal agar putih penuh menyatu dengan kertas */
       #detailModal {
         position: static !important;
-        background: none !important;
+        display: block !important;
+        background-color: #ffffff !important;
+        background: #ffffff !important;
         padding: 0 !important;
         margin: 0 !important;
+        width: 100% !important;
+        height: auto !important;
         overflow: visible !important;
       }
 
       #detailModal > div {
+        background-color: #ffffff !important;
         box-shadow: none !important;
+        border-radius: 0 !important;
         max-width: 100% !important;
         max-height: none !important;
         padding: 0 !important;
@@ -36,7 +51,7 @@
         overflow: visible !important;
       }
 
-      /* Pastikan warna background kotak info & stempel waktu foto ikut tercetak */
+      /* Pastikan warna kotak info & stempel waktu foto tetap tercetak */
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
