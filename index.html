@@ -23,7 +23,7 @@
       }
 
       /* Sembunyikan total container aplikasi utama di belakang modal */
-      #app {
+      #app, #cameraModal {
         display: none !important;
       }
 
@@ -188,14 +188,33 @@
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+                <!-- FOTO SEBELUM PIKET -->
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">Foto Sebelum Piket</label>
-                  <input type="file" accept="image/*" id="fotoSebelumInput" onchange="previewImage(this, 'previewSebelum')" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700">
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="bukaKamera('sebelum')" class="flex-1 bg-blue-900 hover:bg-blue-950 text-white text-xs font-semibold py-2.5 px-3 rounded-lg shadow flex items-center justify-center gap-2 transition">
+                      <i class="fa-solid fa-camera"></i> Buka Kamera
+                    </button>
+                    <label class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-semibold py-2.5 px-3 rounded-lg cursor-pointer flex items-center justify-center gap-2 transition">
+                      <i class="fa-solid fa-folder-open"></i> Pilih File
+                      <input type="file" accept="image/*" capture="environment" id="fotoSebelumInput" onchange="previewImage(this, 'previewSebelum')" class="hidden">
+                    </label>
+                  </div>
                   <img id="previewSebelum" class="mt-3 rounded-lg border h-48 w-full object-cover hidden">
                 </div>
+
+                <!-- FOTO SESUDAH PIKET -->
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">Foto Sesudah Piket</label>
-                  <input type="file" accept="image/*" id="fotoSesudahInput" onchange="previewImage(this, 'previewSesudah')" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-emerald-50 file:text-emerald-700">
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="bukaKamera('sesudah')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2.5 px-3 rounded-lg shadow flex items-center justify-center gap-2 transition">
+                      <i class="fa-solid fa-camera"></i> Buka Kamera
+                    </button>
+                    <label class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold py-2.5 px-3 rounded-lg cursor-pointer flex items-center justify-center gap-2 transition">
+                      <i class="fa-solid fa-folder-open"></i> Pilih File
+                      <input type="file" accept="image/*" capture="environment" id="fotoSesudahInput" onchange="previewImage(this, 'previewSesudah')" class="hidden">
+                    </label>
+                  </div>
                   <img id="previewSesudah" class="mt-3 rounded-lg border h-48 w-full object-cover hidden">
                 </div>
               </div>
@@ -232,6 +251,27 @@
           </div>
         </div>
       </main>
+    </div>
+  </div>
+
+  <!-- MODAL KAMERA LANGSUNG -->
+  <div id="cameraModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 id="cameraModalTitle" class="font-bold text-gray-800 text-base">Ambil Foto Piket</h3>
+        <button type="button" onclick="tutupKamera()" class="text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
+      </div>
+      <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center">
+        <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+      </div>
+      <div class="flex gap-2 justify-between">
+        <button type="button" onclick="gantiKamera()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-semibold py-2.5 px-4 rounded-lg flex items-center gap-2">
+          <i class="fa-solid fa-camera-rotate"></i> Putar Kamera
+        </button>
+        <button type="button" onclick="jepretFoto()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2.5 px-4 rounded-lg shadow flex items-center justify-center gap-2">
+          <i class="fa-solid fa-camera"></i> Ambil Foto
+        </button>
+      </div>
     </div>
   </div>
 
@@ -298,7 +338,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwrIrvvYyRRYhVfja_Z4l5m0z1l5ynzxnC5CKDn9so0ILzFUvgOzG0VsSwczIMY9zk1lg/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyqLhBZu9u7xCfir0ptckzaaZPsRuy97-pwHN_KGjYTAbKcAYwZhqpXp7YWAi3H__Xv8A/exec";
 
     // Menentukan jadwal pulang sekolah berdasarkan hari
     function getJadwalHariIni(namaHari) {
@@ -338,6 +378,65 @@
         badge.innerText = `Hari Ini (${hariIni}): ${jadwal.mulai} - ${jadwal.selesai} WIB`;
       }
     });
+
+    // KONTROL KAMERA LIVE
+    let cameraStream = null;
+    let targetFotoTipe = '';
+    let currentFacingMode = 'environment';
+
+    async function bukaKamera(tipe) {
+      targetFotoTipe = tipe;
+      document.getElementById('cameraModalTitle').innerText = tipe === 'sebelum' ? 'Kamera: Foto Sebelum Piket' : 'Kamera: Foto Sesudah Piket';
+      document.getElementById('cameraModal').classList.remove('hidden');
+
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: currentFacingMode },
+          audio: false
+        });
+        document.getElementById('cameraVideo').srcObject = cameraStream;
+      } catch (err) {
+        alert("Tidak dapat mengakses kamera langsung (" + err.message + "). Silakan gunakan tombol 'Pilih File'.");
+        tutupKamera();
+      }
+    }
+
+    function gantiKamera() {
+      currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+      bukaKamera(targetFotoTipe);
+    }
+
+    function jepretFoto() {
+      const video = document.getElementById('cameraVideo');
+      const canvas = document.createElement('canvas');
+      const maxWidth = 800;
+      const scaleSize = maxWidth / video.videoWidth;
+      canvas.width = maxWidth;
+      canvas.height = video.videoHeight * scaleSize;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      const previewId = targetFotoTipe === 'sebelum' ? 'previewSebelum' : 'previewSesudah';
+      const img = document.getElementById(previewId);
+      img.src = compressedDataUrl;
+      img.classList.remove('hidden');
+
+      tutupKamera();
+    }
+
+    function tutupKamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+      document.getElementById('cameraModal').classList.add('hidden');
+    }
 
     function getDirectImageUrl(url) {
       if (!url) return '';
@@ -549,7 +648,6 @@
             const imgSebelum = getDirectImageUrl(d.url_foto_sebelum);
             const imgSesudah = getDirectImageUrl(d.url_foto_sesudah);
 
-            // Jadwal dan Timestamp otomatis sesuai hari
             const jadwal = getJadwalHariIni(d.hari);
             const jamMulai = d.jam_mulai || jadwal.mulai;
             const jamSelesai = d.jam_selesai || jadwal.selesai;
@@ -654,6 +752,16 @@
 
     function submitFormPiket(e) {
       e.preventDefault();
+      const prevSebelum = document.getElementById('previewSebelum');
+      const prevSesudah = document.getElementById('previewSesudah');
+
+      if (prevSebelum.classList.contains('hidden') || !prevSebelum.src.startsWith('data:image')) {
+        return alert("Silakan ambil atau pilih Foto Sebelum Piket terlebih dahulu!");
+      }
+      if (prevSesudah.classList.contains('hidden') || !prevSesudah.src.startsWith('data:image')) {
+        return alert("Silakan ambil atau pilih Foto Sesudah Piket terlebih dahulu!");
+      }
+
       const btn = document.getElementById('btnSubmitForm');
       btn.innerText = "Mengunggah & Menyimpan...";
       btn.disabled = true;
@@ -676,8 +784,8 @@
         jam_mulai: jadwal.mulai,
         jam_selesai: jadwal.selesai,
         catatan: `Piket selesai dilaksanakan pada jam pulang sekolah (${jadwal.mulai} - ${jadwal.selesai} WIB).`,
-        foto_sebelum: document.getElementById('previewSebelum').src,
-        foto_sesudah: document.getElementById('previewSesudah').src
+        foto_sebelum: prevSebelum.src,
+        foto_sesudah: prevSesudah.src
       };
 
       fetch(API_URL, {
@@ -690,8 +798,8 @@
         if (res.status === "success") {
           alert("Laporan Piket Pulang Sekolah Berhasil Dikirim & Masuk Rekap!");
           document.getElementById('piketForm').reset();
-          document.getElementById('previewSebelum').classList.add('hidden');
-          document.getElementById('previewSesudah').classList.add('hidden');
+          prevSebelum.classList.add('hidden');
+          prevSesudah.classList.add('hidden');
           initApp();
         } else {
           alert("Gagal menyimpan: " + res.message);
